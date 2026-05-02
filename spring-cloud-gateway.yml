@@ -80,9 +80,9 @@ spring:
       password: dao_redis_2024
   security:
     oauth2:
-      resourceserver:
+      resourceserver:          
         jwt:
-          jwk-set-uri: http://localhost:8080/realms/new-doa-relam/protocol/openid-connect/certs
+          jwk-set-uri: http://localhost:8080/realms/dao-realm/protocol/openid-connect/certs
 
 resilience4j:
   circuitbreaker:
