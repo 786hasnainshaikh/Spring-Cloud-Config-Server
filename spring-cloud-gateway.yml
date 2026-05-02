@@ -1,96 +1,88 @@
 spring:
   cloud:
     gateway:
-      routes:
-        - id: application-service
-          uri: lb://application-service
-          predicates:
-            - Path=/api/v1/applications/**
-          filters:
-            - name: CircuitBreaker
-              args:
-                name: application-service-cb
-                fallbackUri: forward:/fallback/application-service
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 20
-                redis-rate-limiter.burstCapacity: 40
-                key-resolver: "#{@ipKeyResolver}"
-
-        - id: otp-service
-          uri: lb://otp-service
-          predicates:
-            - Path=/api/v1/otp/**
-          filters:
-            - name: CircuitBreaker
-              args:
-                name: otp-service-cb
-                fallbackUri: forward:/fallback/otp-service
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 3
-                redis-rate-limiter.burstCapacity: 5
-                key-resolver: "#{@ipKeyResolver}"
-
-        - id: identity-service
-          uri: lb://identity-service
-          predicates:
-            - Path=/api/v1/identity/**
-          filters:
-            - name: CircuitBreaker
-              args:
-                name: identity-service-cb
-                fallbackUri: forward:/fallback/identity-service
-
-        - id: compliance-service
-          uri: lb://compliance-service
-          predicates:
-            - Path=/api/v1/applications/*/compliance,/api/v1/applications/*/fatca
-
-        - id: document-service
-          uri: lb://document-service
-          predicates:
-            - Path=/api/v1/documents/**
-
-        - id: account-service
-          uri: lb://account-service
-          predicates:
-            - Path=/api/v1/accounts/**
-
-        - id: notification-service
-          uri: lb://notification-service
-          predicates:
-            - Path=/api/v1/notifications/**
-
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowedOrigins:
-              - "http://localhost:3000"
-              - "http://localhost:4200"
-            allowedMethods:
-              - GET
-              - POST
-              - PATCH
-              - DELETE
-              - OPTIONS
-            allowedHeaders:
-              - "*"
-            allowCredentials: true
-            maxAge: 3600
-
+      server:
+        webflux:
+          routes:
+            - id: application-service
+              uri: lb://application-service
+              predicates:
+                - Path=/api/v1/applications/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: application-service-cb
+                    fallbackUri: forward:/fallback/application-service
+                - name: RequestRateLimiter
+                  args:
+                    redis-rate-limiter.replenishRate: 20
+                    redis-rate-limiter.burstCapacity: 40
+                    key-resolver: "#{@ipKeyResolver}"
+            - id: otp-service
+              uri: lb://otp-service
+              predicates:
+                - Path=/api/v1/otp/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: otp-service-cb
+                    fallbackUri: forward:/fallback/otp-service
+                - name: RequestRateLimiter
+                  args:
+                    redis-rate-limiter.replenishRate: 3
+                    redis-rate-limiter.burstCapacity: 5
+                    key-resolver: "#{@ipKeyResolver}"
+            - id: identity-service
+              uri: lb://identity-service
+              predicates:
+                - Path=/api/v1/identity/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: identity-service-cb
+                    fallbackUri: forward:/fallback/identity-service
+            - id: compliance-service
+              uri: lb://compliance-service
+              predicates:
+                - Path=/api/v1/applications/*/compliance,/api/v1/applications/*/fatca
+            - id: document-service
+              uri: lb://document-service
+              predicates:
+                - Path=/api/v1/documents/**
+            - id: account-service
+              uri: lb://account-service
+              predicates:
+                - Path=/api/v1/accounts/**
+            - id: notification-service
+              uri: lb://notification-service
+              predicates:
+                - Path=/api/v1/notifications/**
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOrigins:
+                  - "http://localhost:3000"
+                  - "http://localhost:4200"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PATCH
+                  - DELETE
+                  - OPTIONS
+                allowedHeaders:
+                  - "*"
+                allowCredentials: true
+                maxAge: 3600
   data:
     redis:
       host: localhost
       port: 6379
       password: dao_redis_2024
-
   security:
     oauth2:
       resourceserver:
         jwt:
           jwk-set-uri: http://localhost:8080/realms/dao-realm/protocol/openid-connect/certs
-          
 
 resilience4j:
   circuitbreaker:
@@ -100,12 +92,10 @@ resilience4j:
         failure-rate-threshold: 50
         wait-duration-in-open-state: 10s
         permitted-number-of-calls-in-half-open-state: 3
-
       otp-service-cb:
         sliding-window-size: 10
         failure-rate-threshold: 50
         wait-duration-in-open-state: 10s
-
       identity-service-cb:
         sliding-window-size: 5
         failure-rate-threshold: 60
@@ -116,13 +106,11 @@ management:
     web:
       exposure:
         include: health,info,gateway,metrics
-
   endpoint:
     gateway:
-      enabled: true
+      access: unrestricted      # ← fixed
     health:
       show-details: always
-
   tracing:
     sampling:
       probability: 1.0
@@ -131,6 +119,5 @@ logging:
   level:
     org.springframework.cloud.gateway: DEBUG
     com.dao.gateway: DEBUG
-
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%X{traceId}/%X{spanId}] %-5level %logger{36} - %msg%n"
