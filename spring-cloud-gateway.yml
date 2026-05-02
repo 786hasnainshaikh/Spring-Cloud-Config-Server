@@ -82,7 +82,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://localhost:8080/realms/dao-realm/protocol/openid-connect/certs
+          jwk-set-uri: http://localhost:8080/realms/new-doa-relam/protocol/openid-connect/certs
 
 resilience4j:
   circuitbreaker:
