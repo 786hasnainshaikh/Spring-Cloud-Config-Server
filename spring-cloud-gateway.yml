@@ -90,7 +90,7 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: http://localhost:8080/realms/dao-realm/protocol/openid-connect/certs
-          issuer-uri: http://localhost:8080/realms/dao-realm
+          
 
 resilience4j:
   circuitbreaker:
