@@ -10,3 +10,9 @@ spring:
           uri: lb://product-service
           predicates:
             - Path=/api/products/**
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://127.0.0.1:1010/realms/learninRelam
